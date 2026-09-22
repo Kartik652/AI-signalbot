@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>MTF Trading Analyzer</title>
+<title>AI Market Analyzer</title>
 
-<!-- Lightweight Charts -->
+<!-- Chart -->
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 
 <!-- TensorFlow.js -->
@@ -14,1128 +14,882 @@
 
 <style>
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
 body{
-    font-family:Inter,Arial,sans-serif;
-    background:#f5f7fa;
-    color:#111827;
+  font-family:Inter,Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
 }
 
-button,input,select{
-    font-family:inherit;
-}
-
-.container{
-    max-width:1450px;
-    margin:auto;
-    padding:20px;
-}
-
-/* HEADER */
-
-.header{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:16px;
-    padding:18px 22px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-    margin-bottom:16px;
+header{
+  background:#ffffff;
+  border-bottom:1px solid #e5e9f0;
+  padding:18px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:20;
 }
 
 .logo{
-    font-size:22px;
-    font-weight:800;
+  font-size:22px;
+  font-weight:800;
 }
 
 .logo span{
-    color:#16a34a;
-}
-
-.subtitle{
-    color:#6b7280;
-    font-size:12px;
-    margin-top:4px;
+  color:#2563eb;
 }
 
 .status{
-    display:flex;
-    align-items:center;
-    gap:7px;
-    font-size:13px;
-    font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:#667085;
 }
 
-.live-dot{
-    width:9px;
-    height:9px;
-    background:#22c55e;
-    border-radius:50%;
-    box-shadow:0 0 0 4px #dcfce7;
+.dot{
+  width:9px;
+  height:9px;
+  background:#16a34a;
+  border-radius:50%;
+  box-shadow:0 0 8px #16a34a;
 }
 
-/* API */
-
-.api-box{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-    padding:12px;
-    margin-bottom:16px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    align-items:center;
+.container{
+  max-width:1500px;
+  margin:auto;
+  padding:22px;
 }
 
-.api-box input{
-    flex:1;
-    min-width:250px;
-    padding:11px 13px;
-    border:1px solid #d1d5db;
-    border-radius:9px;
-    outline:none;
-}
-
-.btn{
-    border:0;
-    padding:10px 15px;
-    border-radius:9px;
-    cursor:pointer;
-    font-weight:700;
-    background:#111827;
-    color:white;
-}
-
-.btn:hover{
-    opacity:.9;
-}
-
-.btn.green{
-    background:#16a34a;
-}
-
-.btn.red{
-    background:#dc2626;
-}
-
-.btn.gray{
-    background:#e5e7eb;
-    color:#111827;
-}
-
-/* MARKET CARDS */
-
-.market-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    margin-bottom:16px;
+.market-cards{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:10px;
+  margin-bottom:18px;
 }
 
 .market-card{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:13px;
-    padding:14px;
-    cursor:pointer;
-    transition:.15s;
+  background:#fff;
+  border:1px solid #e5e9f0;
+  border-radius:12px;
+  padding:13px;
+  cursor:pointer;
+  transition:.2s;
 }
 
 .market-card:hover{
-    transform:translateY(-2px);
-    border-color:#9ca3af;
+  border-color:#2563eb;
+  transform:translateY(-1px);
+}
+
+.market-card.active{
+  border:2px solid #2563eb;
 }
 
 .market-name{
-    font-weight:800;
-    font-size:14px;
+  font-size:12px;
+  color:#667085;
 }
 
 .market-price{
-    font-size:21px;
-    font-weight:800;
-    margin-top:7px;
+  font-size:17px;
+  font-weight:750;
+  margin-top:5px;
 }
 
 .market-change{
-    font-size:12px;
-    margin-top:4px;
+  font-size:12px;
+  margin-top:3px;
 }
 
-.up{
-    color:#16a34a;
+.up{color:#16a34a}
+.down{color:#dc2626}
+
+.toolbar{
+  background:#fff;
+  border:1px solid #e5e9f0;
+  padding:14px;
+  border-radius:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin-bottom:18px;
 }
 
-.down{
-    color:#dc2626;
+select,button{
+  border:1px solid #d7dce5;
+  background:#fff;
+  border-radius:8px;
+  padding:9px 13px;
+  cursor:pointer;
+  font-size:14px;
 }
 
-.neutral{
-    color:#6b7280;
+button:hover{
+  border-color:#2563eb;
 }
 
-/* CONTROLS */
-
-.controls{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-    padding:13px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-bottom:16px;
-    flex-wrap:wrap;
+.tf-buttons{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
 }
 
-.market-select{
-    padding:10px 12px;
-    border:1px solid #d1d5db;
-    border-radius:9px;
-    font-weight:700;
+.tf-buttons button.active{
+  background:#2563eb;
+  color:#fff;
+  border-color:#2563eb;
 }
 
-.timeframes{
-    display:flex;
-    gap:6px;
-    flex-wrap:wrap;
-}
-
-.tf{
-    padding:9px 13px;
-    border-radius:8px;
-    border:1px solid #d1d5db;
-    background:#fff;
-    cursor:pointer;
-    font-weight:700;
-}
-
-.tf.active{
-    background:#111827;
-    color:#fff;
-    border-color:#111827;
-}
-
-/* MAIN */
-
-.main-grid{
-    display:grid;
-    grid-template-columns:minmax(0,2.1fr) minmax(300px,1fr);
-    gap:16px;
+.dashboard{
+  display:grid;
+  grid-template-columns:minmax(0,2.1fr) minmax(300px,1fr);
+  gap:18px;
 }
 
 .panel{
-    background:white;
-    border:1px solid #e5e7eb;
-    border-radius:16px;
-    overflow:hidden;
-}
-
-.panel-header{
-    padding:16px 18px;
-    border-bottom:1px solid #e5e7eb;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+  background:#fff;
+  border:1px solid #e5e9f0;
+  border-radius:14px;
+  padding:18px;
 }
 
 .panel-title{
-    font-weight:800;
+  font-size:16px;
+  font-weight:750;
+  margin-bottom:15px;
 }
 
-.panel-small{
-    font-size:12px;
-    color:#6b7280;
+.chart-wrap{
+  height:560px;
+  position:relative;
 }
 
 #chart{
-    width:100%;
-    height:510px;
-}
-
-/* ANALYSIS */
-
-.analysis{
-    padding:16px;
+  width:100%;
+  height:100%;
 }
 
 .signal-box{
-    border-radius:15px;
-    padding:22px;
-    text-align:center;
-    margin-bottom:15px;
-    border:2px solid #e5e7eb;
-    background:#f9fafb;
+  border-radius:14px;
+  padding:22px;
+  text-align:center;
+  margin-bottom:15px;
+  border:1px solid #e5e9f0;
 }
 
-.signal-label{
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:1px;
-    color:#6b7280;
+.signal{
+  font-size:34px;
+  font-weight:900;
+  margin:8px 0;
 }
 
-.signal-main{
-    font-size:38px;
-    font-weight:900;
-    margin-top:8px;
+.signal.call{
+  color:#15803d;
+  background:#f0fdf4;
 }
 
-.signal-sub{
-    font-size:17px;
-    font-weight:800;
+.signal.put{
+  color:#b91c1c;
+  background:#fef2f2;
 }
 
-.signal-call{
-    color:#16a34a;
-    background:#f0fdf4;
-    border-color:#86efac;
-}
-
-.signal-put{
-    color:#dc2626;
-    background:#fef2f2;
-    border-color:#fca5a5;
-}
-
-.signal-none{
-    color:#374151;
-    background:#f9fafb;
+.signal.no-trade{
+  color:#475467;
+  background:#f8fafc;
 }
 
 .confidence{
-    margin-top:12px;
-    font-size:13px;
-    color:#374151;
+  font-size:14px;
+  color:#667085;
 }
 
-.conf-bar{
-    height:8px;
-    background:#e5e7eb;
-    border-radius:20px;
-    margin-top:8px;
-    overflow:hidden;
-}
-
-.conf-fill{
-    height:100%;
-    width:0%;
-    background:#16a34a;
-    transition:.4s;
+.metric-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
 }
 
 .metric{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 4px;
-    border-bottom:1px solid #f0f0f0;
+  border:1px solid #e7eaf0;
+  padding:11px;
+  border-radius:10px;
 }
 
-.metric:last-child{
-    border-bottom:0;
-}
-
-.metric-name{
-    color:#6b7280;
-    font-size:13px;
+.metric-label{
+  font-size:11px;
+  color:#667085;
 }
 
 .metric-value{
-    font-weight:800;
-    font-size:13px;
+  font-size:14px;
+  font-weight:700;
+  margin-top:4px;
 }
 
-/* MTF */
-
-.mtf-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:8px;
-    margin-top:12px;
+.mtf{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:10px;
 }
 
 .mtf-card{
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    padding:11px 7px;
-    text-align:center;
-    background:#fafafa;
+  border:1px solid #e5e9f0;
+  padding:10px;
+  border-radius:9px;
+  text-align:center;
 }
 
-.mtf-time{
-    font-size:11px;
-    color:#6b7280;
+.mtf-tf{
+  font-size:11px;
+  color:#667085;
 }
 
 .mtf-signal{
-    font-size:14px;
-    font-weight:900;
-    margin-top:5px;
+  font-weight:800;
+  margin-top:4px;
 }
 
-/* SCANNER */
-
-.scanner-section{
-    margin-top:16px;
+.liquidity{
+  margin-top:15px;
 }
 
-.scanner{
-    padding:18px;
+.liq-row{
+  border:1px solid #e5e9f0;
+  padding:11px;
+  border-radius:9px;
+  margin-bottom:8px;
 }
 
-.scanner-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:18px;
+.liq-title{
+  font-size:12px;
+  color:#667085;
 }
 
-.upload-area{
-    min-height:330px;
-    border:2px dashed #cbd5e1;
-    border-radius:15px;
-    background:#f8fafc;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:25px;
-    cursor:pointer;
-    transition:.2s;
+.liq-price{
+  font-weight:750;
+  margin-top:4px;
 }
 
-.upload-area:hover{
-    border-color:#64748b;
-    background:#f1f5f9;
+.liq-strength{
+  font-size:11px;
+  margin-top:3px;
+}
+
+.sweep{
+  margin-top:10px;
+  padding:11px;
+  border-radius:9px;
+  background:#f8fafc;
+  font-size:13px;
+}
+
+.indicator-bars{
+  margin-top:14px;
+}
+
+.bar-row{
+  display:grid;
+  grid-template-columns:80px 1fr 50px;
+  gap:8px;
+  align-items:center;
+  margin:8px 0;
+  font-size:12px;
+}
+
+.bar{
+  height:7px;
+  border-radius:10px;
+  background:#edf0f4;
+  overflow:hidden;
+}
+
+.bar-fill{
+  height:100%;
+  border-radius:10px;
+  background:#2563eb;
+}
+
+.screenshot-section{
+  margin-top:18px;
+}
+
+.upload{
+  border:2px dashed #cbd5e1;
+  border-radius:14px;
+  padding:35px;
+  text-align:center;
+  background:#fafcff;
+  cursor:pointer;
+}
+
+.upload:hover{
+  border-color:#2563eb;
+  background:#f7faff;
 }
 
 .upload-icon{
-    font-size:46px;
-    margin-bottom:12px;
-}
-
-.upload-title{
-    font-weight:800;
-    font-size:18px;
-}
-
-.upload-text{
-    color:#6b7280;
-    font-size:13px;
-    margin-top:7px;
-    max-width:400px;
+  font-size:38px;
+  margin-bottom:8px;
 }
 
 #imageInput{
-    display:none;
+  display:none;
 }
 
 .preview{
-    width:100%;
-    max-height:290px;
-    object-fit:contain;
-    border-radius:10px;
-    margin-bottom:10px;
-    display:none;
+  display:none;
+  margin-top:18px;
 }
 
-.scanner-result{
-    border:1px solid #e5e7eb;
-    border-radius:15px;
-    padding:18px;
+.preview img{
+  max-width:100%;
+  max-height:500px;
+  border-radius:10px;
+  border:1px solid #e5e9f0;
 }
 
-.ai-title{
-    font-size:13px;
-    color:#6b7280;
-    font-weight:800;
-    letter-spacing:.5px;
+.ai-result{
+  margin-top:18px;
+  display:none;
 }
 
-.ai-signal{
-    margin-top:12px;
-    font-size:36px;
-    font-weight:900;
-}
-
-.ai-confidence{
-    margin-top:5px;
-    font-weight:700;
-}
-
-.ai-reason{
-    margin-top:15px;
-    padding:12px;
-    border-radius:10px;
-    background:#f8fafc;
-    font-size:13px;
-    line-height:1.6;
-}
-
-.scan-features{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-    margin-top:12px;
+.ai-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
 }
 
 .feature{
-    border:1px solid #e5e7eb;
-    padding:10px;
-    border-radius:9px;
+  padding:11px;
+  border:1px solid #e5e9f0;
+  border-radius:9px;
 }
 
-.feature-name{
-    color:#6b7280;
-    font-size:11px;
+.feature small{
+  color:#667085;
+  display:block;
 }
 
-.feature-value{
-    font-weight:800;
-    font-size:13px;
-    margin-top:3px;
+.tensor-status{
+  margin-top:12px;
+  font-size:12px;
+  color:#667085;
 }
-
-.warning{
-    margin-top:14px;
-    padding:10px;
-    border-radius:9px;
-    background:#fff7ed;
-    color:#9a3412;
-    font-size:11px;
-    line-height:1.5;
-}
-
-/* FOOTER */
 
 .footer{
-    text-align:center;
-    color:#9ca3af;
-    font-size:11px;
-    padding:22px 0;
+  text-align:center;
+  color:#98a2b3;
+  padding:25px;
+  font-size:12px;
 }
 
-/* RESPONSIVE */
-
-@media(max-width:1000px){
-
-    .market-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .main-grid{
-        grid-template-columns:1fr;
-    }
-
-    .scanner-grid{
-        grid-template-columns:1fr;
-    }
+@media(max-width:1200px){
+  .market-cards{
+    grid-template-columns:repeat(4,1fr);
+  }
 }
 
-@media(max-width:600px){
+@media(max-width:850px){
+  .dashboard{
+    grid-template-columns:1fr;
+  }
 
-    .container{
-        padding:10px;
-    }
+  .market-cards{
+    grid-template-columns:repeat(2,1fr);
+  }
 
-    .header{
-        align-items:flex-start;
-        flex-direction:column;
-    }
+  .chart-wrap{
+    height:450px;
+  }
+}
 
-    .market-grid{
-        grid-template-columns:1fr 1fr;
-    }
+@media(max-width:500px){
+  .container{
+    padding:12px;
+  }
 
-    #chart{
-        height:400px;
-    }
+  header{
+    padding:14px;
+  }
 
-    .mtf-grid{
-        grid-template-columns:1fr 1fr 1fr;
-    }
+  .market-cards{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .ai-grid{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<header>
+  <div class="logo">AI <span>Market Analyzer</span></div>
+
+  <div class="status">
+    <span class="dot"></span>
+    <span id="connectionStatus">Connecting market data...</span>
+  </div>
+</header>
+
 <div class="container">
 
-    <!-- HEADER -->
+  <!-- MARKET CARDS -->
+  <div class="market-cards" id="marketCards"></div>
 
-    <div class="header">
+  <!-- TOOLBAR -->
+  <div class="toolbar">
 
-        <div>
-            <div class="logo">
-                MTF <span>TRADING ANALYZER</span>
-            </div>
+    <div>
+      <strong>Market:</strong>
+      <select id="symbolSelect"></select>
+    </div>
 
-            <div class="subtitle">
-                Live Market Analysis · Multi-Timeframe · TensorFlow.js Screenshot Scanner
-            </div>
-        </div>
+    <div class="tf-buttons">
+      <button data-tf="1m">1M</button>
+      <button data-tf="5m" class="active">5M</button>
+      <button data-tf="15m">15M</button>
+      <button data-tf="30m">30M</button>
+      <button data-tf="1h">1H</button>
+      <button data-tf="4h">4H</button>
+    </div>
 
-        <div class="status">
-            <span class="live-dot"></span>
-            LIVE DATA
-        </div>
+  </div>
+
+  <div class="dashboard">
+
+    <!-- CHART -->
+    <div class="panel">
+
+      <div class="panel-title">
+        <span id="chartTitle">XAUUSD · 5M</span>
+      </div>
+
+      <div class="chart-wrap">
+        <div id="chart"></div>
+      </div>
 
     </div>
 
+    <!-- ANALYSIS -->
+    <div class="panel">
 
-    <!-- API KEY -->
+      <div class="panel-title">Market Analysis</div>
 
-    <div class="api-box">
+      <div id="signalBox" class="signal-box signal.no-trade">
+        <div>FINAL SIGNAL</div>
+        <div id="finalSignal" class="signal no-trade">NO TRADE</div>
+        <div id="confidence" class="confidence">
+          Waiting for market data...
+        </div>
+      </div>
 
-        <input
-            type="password"
-            id="apiKey"
-            placeholder="Paste your Twelve Data API key here"
+      <div class="metric-grid">
+
+        <div class="metric">
+          <div class="metric-label">Price</div>
+          <div id="price" class="metric-value">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Trend</div>
+          <div id="trend" class="metric-value">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">RSI</div>
+          <div id="rsi" class="metric-value">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">MACD</div>
+          <div id="macd" class="metric-value">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">ATR</div>
+          <div id="atr" class="metric-value">—</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Market Strength</div>
+          <div id="strength" class="metric-value">—</div>
+        </div>
+
+      </div>
+
+      <div class="panel-title" style="margin-top:20px">
+        Multi-Timeframe
+      </div>
+
+      <div class="mtf">
+
+        <div class="mtf-card">
+          <div class="mtf-tf">1M</div>
+          <div id="mtf1" class="mtf-signal">—</div>
+        </div>
+
+        <div class="mtf-card">
+          <div class="mtf-tf">5M</div>
+          <div id="mtf5" class="mtf-signal">—</div>
+        </div>
+
+        <div class="mtf-card">
+          <div class="mtf-tf">15M</div>
+          <div id="mtf15" class="mtf-signal">—</div>
+        </div>
+
+      </div>
+
+      <div class="liquidity">
+
+        <div class="panel-title">
+          Liquidity Zones
+        </div>
+
+        <div class="liq-row">
+          <div class="liq-title">Buy-Side Liquidity</div>
+          <div id="buyLiquidity" class="liq-price">—</div>
+          <div id="buyStrength" class="liq-strength">—</div>
+        </div>
+
+        <div class="liq-row">
+          <div class="liq-title">Sell-Side Liquidity</div>
+          <div id="sellLiquidity" class="liq-price">—</div>
+          <div id="sellStrength" class="liq-strength">—</div>
+        </div>
+
+        <div id="sweep" class="sweep">
+          Liquidity sweep: analyzing...
+        </div>
+
+      </div>
+
+      <div class="indicator-bars">
+
+        <div class="panel-title">
+          Signal Components
+        </div>
+
+        <div class="bar-row">
+          <span>Trend</span>
+          <div class="bar">
+            <div id="trendBar" class="bar-fill" style="width:0%"></div>
+          </div>
+          <span id="trendScore">0</span>
+        </div>
+
+        <div class="bar-row">
+          <span>Momentum</span>
+          <div class="bar">
+            <div id="momentumBar" class="bar-fill" style="width:0%"></div>
+          </div>
+          <span id="momentumScore">0</span>
+        </div>
+
+        <div class="bar-row">
+          <span>Liquidity</span>
+          <div class="bar">
+            <div id="liquidityBar" class="bar-fill" style="width:0%"></div>
+          </div>
+          <span id="liquidityScore">0</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- SCREENSHOT ANALYZER -->
+  <div class="panel screenshot-section">
+
+    <div class="panel-title">
+      🧠 TensorFlow.js Screenshot Analyzer
+    </div>
+
+    <div
+      class="upload"
+      id="uploadBox"
+    >
+
+      <div class="upload-icon">📸</div>
+
+      <strong>
+        Upload your chart screenshot
+      </strong>
+
+      <p style="margin-top:7px;color:#667085;font-size:13px">
+        Drag & drop or click to select a screenshot
+      </p>
+
+      <input
+        id="imageInput"
+        type="file"
+        accept="image/*"
+      >
+
+    </div>
+
+    <div class="preview" id="preview">
+      <img id="previewImage">
+    </div>
+
+    <div class="tensor-status" id="tensorStatus">
+      TensorFlow.js: checking...
+    </div>
+
+    <div class="ai-result" id="aiResult">
+
+      <div class="signal-box signal.no-trade">
+
+        <div>SCREENSHOT SIGNAL</div>
+
+        <div
+          id="imageSignal"
+          class="signal no-trade"
         >
+          ANALYZING
+        </div>
 
-        <button class="btn green" onclick="saveApiKey()">
-            Save API Key
-        </button>
+        <div
+          id="imageConfidence"
+          class="confidence"
+        >
+          —
+        </div>
 
-        <button class="btn gray" onclick="clearApiKey()">
-            Clear
-        </button>
+      </div>
 
-        <span id="apiStatus" class="panel-small">
-            API key not loaded
-        </span>
+      <div class="ai-grid">
+
+        <div class="feature">
+          <small>Visual Direction</small>
+          <strong id="visualDirection">—</strong>
+        </div>
+
+        <div class="feature">
+          <small>Candle Momentum</small>
+          <strong id="candleMomentum">—</strong>
+        </div>
+
+        <div class="feature">
+          <small>Chart Brightness</small>
+          <strong id="brightness">—</strong>
+        </div>
+
+        <div class="feature">
+          <small>Visual Activity</small>
+          <strong id="visualActivity">—</strong>
+        </div>
+
+        <div class="feature">
+          <small>Potential Liquidity Area</small>
+          <strong id="visualLiquidity">—</strong>
+        </div>
+
+        <div class="feature">
+          <small>Tensor Shape</small>
+          <strong id="tensorShape">—</strong>
+        </div>
+
+      </div>
 
     </div>
 
+  </div>
 
-    <!-- MARKET CARDS -->
+</div>
 
-    <div class="market-grid" id="marketCards"></div>
-
-
-    <!-- CONTROLS -->
-
-    <div class="controls">
-
-        <div>
-
-            <select id="marketSelect" class="market-select">
-                <option value="XAU/USD">XAU/USD · GOLD</option>
-                <option value="BTC/USD">BTC/USD</option>
-                <option value="EUR/USD">EUR/USD</option>
-                <option value="GBP/USD">GBP/USD</option>
-                <option value="USD/INR">USD/INR</option>
-                <option value="USD/JPY">USD/JPY</option>
-                <option value="USD/CHF">USD/CHF</option>
-                <option value="AUD/USD">AUD/USD</option>
-            </select>
-
-        </div>
-
-        <div class="timeframes">
-
-            <button class="tf active" data-tf="1min">1m</button>
-            <button class="tf" data-tf="5min">5m</button>
-            <button class="tf" data-tf="15min">15m</button>
-            <button class="tf" data-tf="30min">30m</button>
-            <button class="tf" data-tf="1h">1h</button>
-            <button class="tf" data-tf="4h">4h</button>
-
-        </div>
-
-        <button class="btn" onclick="loadEverything()">
-            ↻ Refresh
-        </button>
-
-    </div>
-
-
-    <!-- MAIN DASHBOARD -->
-
-    <div class="main-grid">
-
-        <!-- CHART -->
-
-        <div class="panel">
-
-            <div class="panel-header">
-
-                <div>
-                    <div class="panel-title" id="chartTitle">
-                        XAU/USD · 1m
-                    </div>
-
-                    <div class="panel-small">
-                        Candlestick market chart
-                    </div>
-                </div>
-
-                <div id="lastUpdated" class="panel-small">
-                    --
-                </div>
-
-            </div>
-
-            <div id="chart"></div>
-
-        </div>
-
-
-        <!-- ANALYSIS -->
-
-        <div class="panel">
-
-            <div class="panel-header">
-
-                <div>
-                    <div class="panel-title">
-                        MTF ANALYSIS
-                    </div>
-
-                    <div class="panel-small">
-                        Final CALL / PUT engine
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="analysis">
-
-                <div id="signalBox" class="signal-box signal-none">
-
-                    <div class="signal-label">
-                        FINAL MTF SIGNAL
-                    </div>
-
-                    <div id="finalSignal" class="signal-main">
-                        WAIT
-                    </div>
-
-                    <div id="signalSub" class="signal-sub">
-                        Loading market...
-                    </div>
-
-                    <div class="confidence">
-                        Confidence:
-                        <strong id="confidenceText">--</strong>
-                    </div>
-
-                    <div class="conf-bar">
-                        <div id="confidenceFill" class="conf-fill"></div>
-                    </div>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        Current Price
-                    </span>
-
-                    <span id="currentPrice" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        EMA 9 / 21
-                    </span>
-
-                    <span id="emaValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        RSI 14
-                    </span>
-
-                    <span id="rsiValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        MACD
-                    </span>
-
-                    <span id="macdValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        Supertrend
-                    </span>
-
-                    <span id="supertrendValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        Support
-                    </span>
-
-                    <span id="supportValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        Resistance
-                    </span>
-
-                    <span id="resistanceValue" class="metric-value">
-                        --
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <span class="metric-name">
-                        Suggested Window
-                    </span>
-
-                    <span id="windowValue" class="metric-value">
-                        1–3 min
-                    </span>
-
-                </div>
-
-
-                <div style="margin-top:15px">
-
-                    <div class="panel-small">
-                        MULTI-TIMEFRAME
-                    </div>
-
-                    <div class="mtf-grid">
-
-                        <div class="mtf-card">
-                            <div class="mtf-time">1 MIN</div>
-                            <div id="mtf1" class="mtf-signal">--</div>
-                        </div>
-
-                        <div class="mtf-card">
-                            <div class="mtf-time">5 MIN</div>
-                            <div id="mtf5" class="mtf-signal">--</div>
-                        </div>
-
-                        <div class="mtf-card">
-                            <div class="mtf-time">15 MIN</div>
-                            <div id="mtf15" class="mtf-signal">--</div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- SCREENSHOT ANALYZER -->
-
-    <div class="panel scanner-section">
-
-        <div class="panel-header">
-
-            <div>
-
-                <div class="panel-title">
-                    AI CHART IMAGE SCANNER
-                </div>
-
-                <div class="panel-small">
-                    TensorFlow.js · Upload a trading-chart screenshot
-                </div>
-
-            </div>
-
-            <div class="status">
-                <span id="tfDot" class="live-dot"></span>
-                <span id="tfStatus">TensorFlow loading...</span>
-            </div>
-
-        </div>
-
-
-        <div class="scanner">
-
-            <div class="scanner-grid">
-
-                <!-- UPLOAD -->
-
-                <div
-                    class="upload-area"
-                    id="uploadArea"
-                    onclick="document.getElementById('imageInput').click()"
-                >
-
-                    <img id="preview" class="preview">
-
-                    <div id="uploadContent">
-
-                        <div class="upload-icon">
-                            📊
-                        </div>
-
-                        <div class="upload-title">
-                            Upload Chart Screenshot
-                        </div>
-
-                        <div class="upload-text">
-                            Upload your Quotex, TradingView or other
-                            candlestick chart screenshot here.
-                        </div>
-
-                        <div class="upload-text" style="margin-top:15px">
-                            PNG · JPG · WEBP
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <input
-                    type="file"
-                    id="imageInput"
-                    accept="image/*"
-                >
-
-
-                <!-- RESULT -->
-
-                <div class="scanner-result">
-
-                    <div class="ai-title">
-                        SCREENSHOT ANALYSIS RESULT
-                    </div>
-
-                    <div id="aiSignal" class="ai-signal">
-                        WAITING
-                    </div>
-
-                    <div id="aiConfidence" class="ai-confidence">
-                        Upload a chart screenshot to analyze
-                    </div>
-
-                    <div class="conf-bar" style="margin-top:12px">
-                        <div id="aiConfidenceFill" class="conf-fill"></div>
-                    </div>
-
-
-                    <div class="scan-features">
-
-                        <div class="feature">
-
-                            <div class="feature-name">
-                                Visual Direction
-                            </div>
-
-                            <div id="visualDirection" class="feature-value">
-                                --
-                            </div>
-
-                        </div>
-
-
-                        <div class="feature">
-
-                            <div class="feature-name">
-                                Candle Balance
-                            </div>
-
-                            <div id="candleBalance" class="feature-value">
-                                --
-                            </div>
-
-                        </div>
-
-
-                        <div class="feature">
-
-                            <div class="feature-name">
-                                Image Momentum
-                            </div>
-
-                            <div id="imageMomentum" class="feature-value">
-                                --
-                            </div>
-
-                        </div>
-
-
-                        <div class="feature">
-
-                            <div class="feature-name">
-                                Chart Structure
-                            </div>
-
-                            <div id="chartStructure" class="feature-value">
-                                --
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div id="aiReason" class="ai-reason">
-                        The screenshot scanner will analyze the uploaded image.
-                    </div>
-
-
-                    <button
-                        id="scanButton"
-                        class="btn green"
-                        style="width:100%;margin-top:14px"
-                        onclick="scanScreenshot()"
-                    >
-                        🧠 Analyze Screenshot
-                    </button>
-
-
-                    <div class="warning">
-                        ⚠ Experimental visual analysis. Screenshot analysis
-                        does not guarantee a profitable CALL or PUT. Use it
-                        together with the live MTF analysis.
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="footer">
-        Personal-use market analysis dashboard · API data may be delayed
-        depending on your data provider and plan.
-    </div>
-
+<div class="footer">
+  Experimental market-analysis tool. Signals are analytical outputs, not guaranteed trading results.
 </div>
 
 
 <script>
 
 /* =========================================================
-   CONFIG
+   CONFIGURATION
 ========================================================= */
 
-const MARKETS = [
-    "XAU/USD",
-    "BTC/USD",
-    "EUR/USD",
-    "GBP/USD",
-    "USD/INR",
-    "USD/JPY",
-    "USD/CHF",
-    "AUD/USD"
+const API = "https://biquote.io/api";
+
+const MARKETS = {
+
+  XAUUSD:{
+    name:"Gold",
+    digits:2
+  },
+
+  BTCUSD:{
+    name:"Bitcoin",
+    digits:2
+  },
+
+  EURUSD:{
+    name:"EUR/USD",
+    digits:5
+  },
+
+  GBPUSD:{
+    name:"GBP/USD",
+    digits:5
+  },
+
+  USDINR:{
+    name:"USD/INR",
+    digits:2
+  },
+
+  USDJPY:{
+    name:"USD/JPY",
+    digits:3
+  },
+
+  USDCHF:{
+    name:"USD/CHF",
+    digits:5
+  },
+
+  AUDUSD:{
+    name:"AUD/USD",
+    digits:5
+  }
+
+};
+
+const TIMEFRAMES = [
+  "1m",
+  "5m",
+  "15m",
+  "30m",
+  "1h",
+  "4h"
 ];
 
-let apiKey = localStorage.getItem("twelveDataApiKey") || "";
-
-let selectedMarket = "XAU/USD";
-let selectedTimeframe = "1min";
+let selectedSymbol = "XAUUSD";
+let selectedTF = "5m";
 
 let chart;
 let candleSeries;
+let ema9Series;
+let ema21Series;
 
-let latestCandles = [];
+let currentBars = [];
 
-let scannerImage = null;
+let timeframeCache = {};
+
+let latestAnalysis = {};
 
 
 /* =========================================================
-   API KEY
+   DOM
 ========================================================= */
 
-function saveApiKey(){
+const symbolSelect =
+  document.getElementById("symbolSelect");
 
-    const input = document.getElementById("apiKey");
+const marketCards =
+  document.getElementById("marketCards");
 
-    apiKey = input.value.trim();
 
-    if(!apiKey){
-        document.getElementById("apiStatus").textContent =
-            "Please enter an API key.";
-        return;
-    }
+/* =========================================================
+   BUILD MARKET SELECT
+========================================================= */
 
-    localStorage.setItem("twelveDataApiKey",apiKey);
+Object.keys(MARKETS).forEach(symbol=>{
 
-    document.getElementById("apiStatus").textContent =
-        "API key saved locally.";
+  const option =
+    document.createElement("option");
 
-    loadEverything();
+  option.value = symbol;
+  option.textContent =
+    `${symbol} — ${MARKETS[symbol].name}`;
+
+  symbolSelect.appendChild(option);
+
+});
+
+
+symbolSelect.value = selectedSymbol;
+
+
+/* =========================================================
+   BUILD MARKET CARDS
+========================================================= */
+
+function createMarketCards(){
+
+  marketCards.innerHTML = "";
+
+  Object.keys(MARKETS).forEach(symbol=>{
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "market-card" +
+      (symbol === selectedSymbol ? " active" : "");
+
+    card.id =
+      "card-" + symbol;
+
+    card.innerHTML = `
+      <div class="market-name">
+        ${symbol}
+      </div>
+
+      <div
+        class="market-price"
+        id="cardPrice-${symbol}"
+      >
+        —
+      </div>
+
+      <div
+        class="market-change"
+        id="cardChange-${symbol}"
+      >
+        —
+      </div>
+    `;
+
+    card.onclick = ()=>{
+
+      selectedSymbol = symbol;
+
+      symbolSelect.value = symbol;
+
+      document
+        .querySelectorAll(".market-card")
+        .forEach(x=>x.classList.remove("active"));
+
+      card.classList.add("active");
+
+      loadChart();
+
+    };
+
+    marketCards.appendChild(card);
+
+  });
+
 }
 
-
-function clearApiKey(){
-
-    localStorage.removeItem("twelveDataApiKey");
-
-    apiKey = "";
-
-    document.getElementById("apiKey").value = "";
-
-    document.getElementById("apiStatus").textContent =
-        "API key cleared.";
-}
-
-
-if(apiKey){
-
-    document.getElementById("apiKey").value = apiKey;
-
-    document.getElementById("apiStatus").textContent =
-        "API key loaded from this browser.";
-
-}
+createMarketCards();
 
 
 /* =========================================================
@@ -1144,250 +898,210 @@ if(apiKey){
 
 function createChart(){
 
-    const element = document.getElementById("chart");
+  const container =
+    document.getElementById("chart");
 
-    chart = LightweightCharts.createChart(
-        element,
-        {
-            layout:{
-                background:{
-                    color:"#ffffff"
-                },
-                textColor:"#374151"
-            },
+  container.innerHTML = "";
 
-            grid:{
-                vertLines:{
-                    color:"#f0f2f5"
-                },
-                horzLines:{
-                    color:"#f0f2f5"
-                }
-            },
+  chart =
+    LightweightCharts.createChart(
+      container,
+      {
+        layout:{
+          background:{
+            color:"#ffffff"
+          },
+          textColor:"#667085"
+        },
 
-            rightPriceScale:{
-                borderColor:"#e5e7eb"
-            },
+        grid:{
+          vertLines:{
+            color:"#eef1f5"
+          },
+          horzLines:{
+            color:"#eef1f5"
+          }
+        },
 
-            timeScale:{
-                borderColor:"#e5e7eb",
-                timeVisible:true,
-                secondsVisible:false
-            }
+        crosshair:{
+          mode:
+            LightweightCharts.CrosshairMode.Normal
+        },
+
+        rightPriceScale:{
+          borderColor:"#e5e9f0"
+        },
+
+        timeScale:{
+          borderColor:"#e5e9f0",
+          timeVisible:true
         }
+      }
     );
 
-    candleSeries = chart.addCandlestickSeries({
-        upColor:"#16a34a",
-        downColor:"#dc2626",
-        borderUpColor:"#16a34a",
-        borderDownColor:"#dc2626",
-        wickUpColor:"#16a34a",
-        wickDownColor:"#dc2626"
+  candleSeries =
+    chart.addCandlestickSeries({
+      upColor:"#16a34a",
+      downColor:"#dc2626",
+      borderUpColor:"#16a34a",
+      borderDownColor:"#dc2626",
+      wickUpColor:"#16a34a",
+      wickDownColor:"#dc2626"
+    });
+
+  ema9Series =
+    chart.addLineSeries({
+      color:"#2563eb",
+      lineWidth:2
+    });
+
+  ema21Series =
+    chart.addLineSeries({
+      color:"#f59e0b",
+      lineWidth:2
     });
 
 }
-
 
 createChart();
 
 
-window.addEventListener("resize",()=>{
-
-    const element = document.getElementById("chart");
-
-    if(chart){
-
-        chart.applyOptions({
-            width:element.clientWidth
-        });
-
-    }
-
-});
-
-
 /* =========================================================
-   MARKET CARDS
+   FETCH OHLC
 ========================================================= */
 
-function buildMarketCards(){
+async function fetchBars(symbol, interval){
 
-    const container =
-        document.getElementById("marketCards");
+  const url =
+    `${API}/${symbol}/ohlc?interval=${interval}&limit=300`;
 
-    container.innerHTML = "";
+  const response =
+    await fetch(url);
 
-    MARKETS.forEach(symbol=>{
+  if(!response.ok){
 
-        const card =
-            document.createElement("div");
+    throw new Error(
+      `Market data error ${response.status}`
+    );
 
-        card.className = "market-card";
+  }
 
-        card.innerHTML = `
+  const json =
+    await response.json();
 
-            <div class="market-name">
-                ${symbol}
-            </div>
+  if(!json.bars){
 
-            <div
-                id="price-${symbol.replace("/","")}"
-                class="market-price"
-            >
-                --
-            </div>
+    throw new Error(
+      "No candle data returned"
+    );
 
-            <div
-                id="change-${symbol.replace("/","")}"
-                class="market-change neutral"
-            >
-                Waiting...
-            </div>
+  }
 
-        `;
-
-        card.onclick = ()=>{
-
-            document.getElementById("marketSelect").value =
-                symbol;
-
-            selectedMarket = symbol;
-
-            loadEverything();
-
-        };
-
-        container.appendChild(card);
-
-    });
-
-}
-
-
-buildMarketCards();
-
-
-/* =========================================================
-   TIMEFRAME BUTTONS
-========================================================= */
-
-document.querySelectorAll(".tf").forEach(button=>{
-
-    button.addEventListener("click",()=>{
-
-        document.querySelectorAll(".tf")
-            .forEach(x=>x.classList.remove("active"));
-
-        button.classList.add("active");
-
-        selectedTimeframe =
-            button.dataset.tf;
-
-        loadEverything();
-
-    });
-
-});
-
-
-document.getElementById("marketSelect")
-.addEventListener("change",function(){
-
-    selectedMarket = this.value;
-
-    loadEverything();
-
-});
-
-
-/* =========================================================
-   TWELVE DATA REQUEST
-========================================================= */
-
-async function getCandles(symbol,interval,outputsize=150){
-
-    if(!apiKey){
-
-        throw new Error(
-            "Add your Twelve Data API key first."
-        );
-
-    }
-
-    const url =
-        "https://api.twelvedata.com/time_series" +
-        "?symbol=" + encodeURIComponent(symbol) +
-        "&interval=" + encodeURIComponent(interval) +
-        "&outputsize=" + outputsize +
-        "&apikey=" + encodeURIComponent(apiKey);
-
-    const response =
-        await fetch(url);
-
-    const data =
-        await response.json();
-
-    if(data.status === "error"){
-
-        throw new Error(
-            data.message || "API error"
-        );
-
-    }
-
-    if(!data.values || !data.values.length){
-
-        throw new Error(
-            "No candle data received."
-        );
-
-    }
-
-    return data.values
-        .reverse()
-        .map(c=>({
-
-            time:Math.floor(
-                new Date(c.datetime).getTime()/1000
-            ),
-
-            open:Number(c.open),
-            high:Number(c.high),
-            low:Number(c.low),
-            close:Number(c.close)
-
-        }));
+  return json.bars
+    .slice()
+    .reverse();
 
 }
 
 
 /* =========================================================
-   QUOTE
+   FETCH LATEST PRICES
 ========================================================= */
 
-async function getQuote(symbol){
+async function updateMarketCards(){
 
-    if(!apiKey) return null;
+  try{
 
-    const url =
-        "https://api.twelvedata.com/quote" +
-        "?symbol=" + encodeURIComponent(symbol) +
-        "&apikey=" + encodeURIComponent(apiKey);
+    const symbols =
+      Object.keys(MARKETS);
+
+    const params =
+      symbols
+        .map(s=>`symbols=${encodeURIComponent(s)}`)
+        .join("&");
 
     const response =
-        await fetch(url);
+      await fetch(`${API}/latest?${params}`);
+
+    if(!response.ok)
+      throw new Error("Latest price request failed");
 
     const data =
-        await response.json();
+      await response.json();
 
-    if(data.status === "error"){
+    symbols.forEach(symbol=>{
 
-        return null;
+      const tick = data[symbol];
 
+      if(!tick)
+        return;
+
+      const price =
+        Number(tick.mid);
+
+      const change =
+        Number(tick.dayDiffPercent || 0);
+
+      const priceEl =
+        document.getElementById(
+          `cardPrice-${symbol}`
+        );
+
+      const changeEl =
+        document.getElementById(
+          `cardChange-${symbol}`
+        );
+
+      priceEl.textContent =
+        formatPrice(price,symbol);
+
+      changeEl.textContent =
+        `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`;
+
+      changeEl.className =
+        "market-change " +
+        (change >= 0 ? "up" : "down");
+
+    });
+
+    document.getElementById(
+      "connectionStatus"
+    ).textContent =
+      "Live market data connected";
+
+  }catch(error){
+
+    document.getElementById(
+      "connectionStatus"
+    ).textContent =
+      "Market feed unavailable";
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* =========================================================
+   FORMAT PRICE
+========================================================= */
+
+function formatPrice(price,symbol){
+
+  if(!Number.isFinite(price))
+    return "—";
+
+  const digits =
+    MARKETS[symbol]?.digits ?? 2;
+
+  return price.toLocaleString(
+    undefined,
+    {
+      minimumFractionDigits:digits,
+      maximumFractionDigits:digits
     }
-
-    return data;
+  );
 
 }
 
@@ -1398,1447 +1112,1520 @@ async function getQuote(symbol){
 
 function ema(values,period){
 
-    if(values.length < period)
-        return [];
+  const result =
+    new Array(values.length).fill(null);
 
-    const result = [];
-
-    const multiplier =
-        2/(period+1);
-
-    let previous =
-        values
-        .slice(0,period)
-        .reduce((a,b)=>a+b,0)/period;
-
-    result[period-1] = previous;
-
-    for(let i=period;i<values.length;i++){
-
-        previous =
-            ((values[i]-previous)*multiplier)
-            + previous;
-
-        result[i] = previous;
-
-    }
-
+  if(values.length < period)
     return result;
+
+  let sum = 0;
+
+  for(let i=0;i<period;i++)
+    sum += values[i];
+
+  let previous =
+    sum / period;
+
+  result[period-1] =
+    previous;
+
+  const multiplier =
+    2/(period+1);
+
+  for(
+    let i=period;
+    i<values.length;
+    i++
+  ){
+
+    previous =
+      (values[i]-previous)
+      * multiplier
+      + previous;
+
+    result[i] =
+      previous;
+
+  }
+
+  return result;
 
 }
 
 
 function rsi(values,period=14){
 
-    if(values.length <= period)
-        return [];
+  const result =
+    new Array(values.length).fill(null);
 
-    let gains = 0;
-    let losses = 0;
-
-    for(let i=1;i<=period;i++){
-
-        const diff =
-            values[i]-values[i-1];
-
-        if(diff>=0)
-            gains += diff;
-        else
-            losses += Math.abs(diff);
-
-    }
-
-    let avgGain = gains/period;
-    let avgLoss = losses/period;
-
-    const result = [];
-
-    result[period] =
-        avgLoss===0
-        ? 100
-        : 100-(100/(1+(avgGain/avgLoss)));
-
-    for(let i=period+1;i<values.length;i++){
-
-        const diff =
-            values[i]-values[i-1];
-
-        const gain =
-            Math.max(diff,0);
-
-        const loss =
-            Math.max(-diff,0);
-
-        avgGain =
-            ((avgGain*(period-1))+gain)/period;
-
-        avgLoss =
-            ((avgLoss*(period-1))+loss)/period;
-
-        result[i] =
-            avgLoss===0
-            ? 100
-            : 100-(100/(1+(avgGain/avgLoss)));
-
-    }
-
+  if(values.length <= period)
     return result;
+
+  let gains=0;
+  let losses=0;
+
+  for(let i=1;i<=period;i++){
+
+    const diff =
+      values[i]-values[i-1];
+
+    if(diff>=0)
+      gains += diff;
+
+    else
+      losses -= diff;
+
+  }
+
+  let avgGain =
+    gains/period;
+
+  let avgLoss =
+    losses/period;
+
+  result[period] =
+    avgLoss === 0
+      ? 100
+      : 100 -
+        (100/(1+avgGain/avgLoss));
+
+  for(
+    let i=period+1;
+    i<values.length;
+    i++
+  ){
+
+    const diff =
+      values[i]-values[i-1];
+
+    const gain =
+      Math.max(diff,0);
+
+    const loss =
+      Math.max(-diff,0);
+
+    avgGain =
+      ((avgGain*(period-1))+gain)
+      /period;
+
+    avgLoss =
+      ((avgLoss*(period-1))+loss)
+      /period;
+
+    result[i] =
+      avgLoss === 0
+        ? 100
+        : 100 -
+          (100/(1+avgGain/avgLoss));
+
+  }
+
+  return result;
 
 }
 
 
 function macd(values){
 
-    const e12 = ema(values,12);
-    const e26 = ema(values,26);
+  const fast =
+    ema(values,12);
 
-    const macdLine = [];
+  const slow =
+    ema(values,26);
 
-    for(let i=0;i<values.length;i++){
+  const line =
+    values.map(
+      (_,i)=>
+        fast[i] !== null &&
+        slow[i] !== null
+          ? fast[i]-slow[i]
+          : null
+    );
 
-        if(e12[i]!==undefined && e26[i]!==undefined){
+  const usable =
+    line.filter(x=>x!==null);
 
-            macdLine[i] =
-                e12[i]-e26[i];
+  const signalPartial =
+    ema(usable,9);
 
-        }
+  const signal =
+    new Array(line.length).fill(null);
+
+  let j=0;
+
+  for(let i=0;i<line.length;i++){
+
+    if(line[i] !== null){
+
+      signal[i] =
+        signalPartial[j] ?? null;
+
+      j++;
 
     }
 
-    const usable =
-        macdLine.filter(x=>x!==undefined);
+  }
 
-    const signal =
-        ema(usable,9);
+  const histogram =
+    line.map(
+      (x,i)=>
+        x !== null &&
+        signal[i] !== null
+          ? x-signal[i]
+          : null
+    );
 
-    const lastMacd =
-        usable[usable.length-1];
-
-    const lastSignal =
-        signal[signal.length-1];
-
-    return {
-        macd:lastMacd,
-        signal:lastSignal
-    };
+  return {
+    line,
+    signal,
+    histogram
+  };
 
 }
 
 
-function atr(candles,period=14){
+function atr(bars,period=14){
 
-    if(candles.length < period+1)
-        return null;
+  const tr = [];
 
-    const tr=[];
+  for(let i=0;i<bars.length;i++){
 
-    for(let i=1;i<candles.length;i++){
+    if(i===0){
 
-        const current =
-            candles[i];
+      tr.push(
+        bars[i].high-bars[i].low
+      );
 
-        const previous =
-            candles[i-1];
+      continue;
 
-        tr.push(
-            Math.max(
-                current.high-current.low,
-                Math.abs(current.high-previous.close),
-                Math.abs(current.low-previous.close)
-            )
+    }
+
+    const high =
+      bars[i].high;
+
+    const low =
+      bars[i].low;
+
+    const previousClose =
+      bars[i-1].close;
+
+    tr.push(
+      Math.max(
+        high-low,
+        Math.abs(high-previousClose),
+        Math.abs(low-previousClose)
+      )
+    );
+
+  }
+
+  const result =
+    new Array(bars.length).fill(null);
+
+  if(tr.length < period)
+    return result;
+
+  let sum=0;
+
+  for(let i=0;i<period;i++)
+    sum += tr[i];
+
+  result[period-1] =
+    sum/period;
+
+  for(
+    let i=period;
+    i<tr.length;
+    i++
+  ){
+
+    result[i] =
+      ((result[i-1]*(period-1))+tr[i])
+      /period;
+
+  }
+
+  return result;
+
+}
+
+
+/* =========================================================
+   LIQUIDITY
+========================================================= */
+
+function calculateLiquidity(bars){
+
+  const recent =
+    bars.slice(-80);
+
+  if(recent.length < 10){
+
+    return {
+      buy:null,
+      sell:null,
+      sweep:"Insufficient data"
+    };
+
+  }
+
+  const highs =
+    recent.map(x=>x.high);
+
+  const lows =
+    recent.map(x=>x.low);
+
+  const buy =
+    Math.max(...highs);
+
+  const sell =
+    Math.min(...lows);
+
+  const last =
+    recent[recent.length-1];
+
+  const previousHigh =
+    Math.max(
+      ...recent.slice(0,-3).map(x=>x.high)
+    );
+
+  const previousLow =
+    Math.min(
+      ...recent.slice(0,-3).map(x=>x.low)
+    );
+
+  let sweep =
+    "No clear liquidity sweep";
+
+  if(
+    last.high > previousHigh &&
+    last.close < previousHigh
+  ){
+
+    sweep =
+      "⚠ Buy-side liquidity sweep detected";
+
+  }
+
+  if(
+    last.low < previousLow &&
+    last.close > previousLow
+  ){
+
+    sweep =
+      "⚠ Sell-side liquidity sweep detected";
+
+  }
+
+  return {
+    buy,
+    sell,
+    sweep
+  };
+
+}
+
+
+/* =========================================================
+   ANALYZE TIMEFRAME
+========================================================= */
+
+function analyzeBars(bars){
+
+  const closes =
+    bars.map(x=>x.close);
+
+  const ema9 =
+    ema(closes,9);
+
+  const ema21 =
+    ema(closes,21);
+
+  const rsiValues =
+    rsi(closes,14);
+
+  const macdValues =
+    macd(closes);
+
+  const atrValues =
+    atr(bars,14);
+
+  const last =
+    closes.length-1;
+
+  const price =
+    closes[last];
+
+  const e9 =
+    ema9[last];
+
+  const e21 =
+    ema21[last];
+
+  const currentRSI =
+    rsiValues[last];
+
+  const currentMACD =
+    macdValues.line[last];
+
+  const currentSignal =
+    macdValues.signal[last];
+
+  const currentHistogram =
+    macdValues.histogram[last];
+
+  const currentATR =
+    atrValues[last];
+
+  let score=0;
+
+  if(e9 !== null && e21 !== null){
+
+    if(e9 > e21)
+      score += 2;
+
+    if(e9 < e21)
+      score -= 2;
+
+  }
+
+  if(currentRSI !== null){
+
+    if(currentRSI > 55)
+      score += 1;
+
+    if(currentRSI < 45)
+      score -= 1;
+
+  }
+
+  if(
+    currentMACD !== null &&
+    currentSignal !== null
+  ){
+
+    if(currentMACD > currentSignal)
+      score += 2;
+
+    if(currentMACD < currentSignal)
+      score -= 2;
+
+  }
+
+  const lastCandle =
+    bars[bars.length-1];
+
+  if(
+    lastCandle.close >
+    lastCandle.open
+  )
+    score += 1;
+
+  if(
+    lastCandle.close <
+    lastCandle.open
+  )
+    score -= 1;
+
+  let signal =
+    "NO TRADE";
+
+  if(score >= 3)
+    signal="CALL";
+
+  if(score <= -3)
+    signal="PUT";
+
+  let trend="SIDEWAYS";
+
+  if(e9 > e21)
+    trend="UPTREND";
+
+  if(e9 < e21)
+    trend="DOWNTREND";
+
+  let momentum="NEUTRAL";
+
+  if(
+    currentRSI > 55 &&
+    currentHistogram > 0
+  )
+    momentum="BULLISH";
+
+  if(
+    currentRSI < 45 &&
+    currentHistogram < 0
+  )
+    momentum="BEARISH";
+
+  const liquidity =
+    calculateLiquidity(bars);
+
+  return {
+
+    signal,
+    score,
+    trend,
+    momentum,
+    rsi:currentRSI,
+    macd:currentMACD,
+    histogram:currentHistogram,
+    atr:currentATR,
+    ema9:e9,
+    ema21:e21,
+    price,
+    liquidity
+
+  };
+
+}
+
+
+/* =========================================================
+   MULTI TIMEFRAME
+========================================================= */
+
+async function getMTF(){
+
+  const results={};
+
+  for(const tf of ["1m","5m","15m"]){
+
+    try{
+
+      const bars =
+        await fetchBars(
+          selectedSymbol,
+          tf
         );
 
+      results[tf] =
+        analyzeBars(bars);
+
+    }catch(error){
+
+      console.error(
+        `MTF ${tf}`,
+        error
+      );
+
+      results[tf]=null;
+
     }
 
-    const recent =
-        tr.slice(-period);
+  }
 
-    return recent.reduce(
-        (a,b)=>a+b,0
-    )/recent.length;
+  return results;
 
 }
 
 
 /* =========================================================
-   SUPPORT / RESISTANCE
+   FINAL SIGNAL
 ========================================================= */
 
-function supportResistance(candles){
-
-    const recent =
-        candles.slice(-40);
-
-    const lows =
-        recent.map(c=>c.low);
-
-    const highs =
-        recent.map(c=>c.high);
-
-    return {
-
-        support:Math.min(...lows),
-
-        resistance:Math.max(...highs)
-
-    };
-
-}
-
-
-/* =========================================================
-   INDICATOR SIGNAL
-========================================================= */
-
-function calculateSignal(candles){
-
-    const closes =
-        candles.map(c=>c.close);
-
-    const last =
-        closes[closes.length-1];
-
-    const e9 =
-        ema(closes,9);
-
-    const e21 =
-        ema(closes,21);
-
-    const r =
-        rsi(closes,14);
-
-    const m =
-        macd(closes);
-
-    const ema9 =
-        e9[e9.length-1];
-
-    const ema21 =
-        e21[e21.length-1];
-
-    const rsiNow =
-        r[r.length-1];
-
-    let score = 0;
-
-    /* EMA */
-
-    if(ema9 > ema21)
-        score += 2;
-
-    if(ema9 < ema21)
-        score -= 2;
-
-
-    /* RSI */
-
-    if(rsiNow > 52 && rsiNow < 72)
-        score += 1;
-
-    if(rsiNow < 48 && rsiNow > 28)
-        score -= 1;
-
-
-    /* MACD */
-
-    if(m.macd > m.signal)
-        score += 2;
-
-    if(m.macd < m.signal)
-        score -= 2;
-
-
-    /* Recent candles */
-
-    const recent =
-        candles.slice(-5);
-
-    const green =
-        recent.filter(
-            c=>c.close>c.open
-        ).length;
-
-    const red =
-        recent.filter(
-            c=>c.close<c.open
-        ).length;
-
-    if(green > red)
-        score += 1;
-
-    if(red > green)
-        score -= 1;
-
-
-    let signal;
-
-    if(score >= 3)
-        signal = "CALL";
-
-    else if(score <= -3)
-        signal = "PUT";
-
-    else
-        signal = "NO TRADE";
-
-
-    const confidence =
-        Math.min(
-            95,
-            Math.max(
-                50,
-                50 + Math.abs(score)*7
-            )
-        );
-
-    return {
-
-        signal,
-        confidence,
-        score,
-        ema9,
-        ema21,
-        rsi:rsiNow,
-        macd:m
-
-    };
-
-}
-
-
-/* =========================================================
-   MTF
-========================================================= */
-
-async function getMTF(symbol){
-
-    const intervals = [
-        "1min",
-        "5min",
-        "15min"
-    ];
-
-    const results = {};
-
-    for(const interval of intervals){
-
-        try{
-
-            const candles =
-                await getCandles(
-                    symbol,
-                    interval,
-                    120
-                );
-
-            results[interval] =
-                calculateSignal(candles);
-
-        }
-        catch(error){
-
-            results[interval] = {
-                signal:"ERROR",
-                confidence:0,
-                error:error.message
-            };
-
-        }
-
-    }
-
-    return results;
-
-}
-
-
-/* =========================================================
-   FINAL MTF SIGNAL
-========================================================= */
-
-function finalMTFSignal(mtf){
-
-    const signals = [
-
-        mtf["1min"]?.signal,
-
-        mtf["5min"]?.signal,
-
-        mtf["15min"]?.signal
-
-    ];
-
-    const calls =
-        signals.filter(x=>x==="CALL").length;
-
-    const puts =
-        signals.filter(x=>x==="PUT").length;
-
-
-    /*
-       Require agreement.
-
-       Example:
-
-       CALL CALL CALL = CALL
-       PUT PUT PUT = PUT
-
-       CALL CALL PUT =
-       NO TRADE / CONFLICT
-    */
-
-    if(calls >= 2 && puts === 0){
-
-        return {
-            signal:"CALL",
-            confidence:Math.round(
-                (mtf["1min"].confidence+
-                 mtf["5min"].confidence+
-                 mtf["15min"].confidence)/3
-            )
-        };
-
-    }
-
-
-    if(puts >= 2 && calls === 0){
-
-        return {
-            signal:"PUT",
-            confidence:Math.round(
-                (mtf["1min"].confidence+
-                 mtf["5min"].confidence+
-                 mtf["15min"].confidence)/3
-            )
-        };
-
-    }
-
-
-    return {
-        signal:"NO TRADE",
-        confidence:50
-    };
-
-}
-
-
-/* =========================================================
-   DISPLAY SIGNAL
-========================================================= */
-
-function displayFinalSignal(result){
-
-    const box =
-        document.getElementById("signalBox");
-
-    const signal =
-        document.getElementById("finalSignal");
-
-    const sub =
-        document.getElementById("signalSub");
-
-    box.className =
-        "signal-box";
-
-    if(result.signal==="CALL"){
-
-        box.classList.add("signal-call");
-
-        signal.textContent =
-            "CALL";
-
-        sub.textContent =
-            "↑ UP";
-
-    }
-
-    else if(result.signal==="PUT"){
-
-        box.classList.add("signal-put");
-
-        signal.textContent =
-            "PUT";
-
-        sub.textContent =
-            "↓ DOWN";
-
-    }
-
-    else{
-
-        box.classList.add("signal-none");
-
-        signal.textContent =
-            "NO TRADE";
-
-        sub.textContent =
-            "⚠ MTF CONFLICT";
-
-    }
-
-
-    document.getElementById("confidenceText")
-        .textContent =
-        result.confidence + "%";
-
-
-    document.getElementById("confidenceFill")
-        .style.width =
-        result.confidence + "%";
-
-}
-
-
-/* =========================================================
-   MTF DISPLAY
-========================================================= */
-
-function displayMTF(mtf){
-
-    setMTF(
-        "mtf1",
-        mtf["1min"]
+function calculateFinalSignal(mtf,current){
+
+  const signals =
+    Object.values(mtf)
+      .filter(Boolean)
+      .map(x=>x.signal);
+
+  const calls =
+    signals.filter(x=>x==="CALL").length;
+
+  const puts =
+    signals.filter(x=>x==="PUT").length;
+
+  let final =
+    "NO TRADE";
+
+  if(calls >= 2 && puts === 0)
+    final="CALL";
+
+  else if(puts >= 2 && calls === 0)
+    final="PUT";
+
+  else if(
+    current.score >= 5 &&
+    calls >= 1 &&
+    puts === 0
+  )
+    final="CALL";
+
+  else if(
+    current.score <= -5 &&
+    puts >= 1 &&
+    calls === 0
+  )
+    final="PUT";
+
+  let confidence=50;
+
+  const total =
+    Math.max(signals.length,1);
+
+  const agreement =
+    Math.max(calls,puts)/total;
+
+  confidence =
+    Math.round(
+      50 +
+      agreement*35 +
+      Math.min(
+        15,
+        Math.abs(current.score)*2
+      )
     );
 
-    setMTF(
-        "mtf5",
-        mtf["5min"]
-    );
+  confidence =
+    Math.min(94,confidence);
 
-    setMTF(
-        "mtf15",
-        mtf["15min"]
-    );
+  return {
+    final,
+    confidence
+  };
 
 }
 
 
-function setMTF(id,data){
+/* =========================================================
+   DRAW CHART
+========================================================= */
 
-    const element =
+function drawChart(bars){
+
+  const candles =
+    bars.map(b=>({
+
+      time:
+        Math.floor(
+          new Date(b.openTime).getTime()/1000
+        ),
+
+      open:b.open,
+      high:b.high,
+      low:b.low,
+      close:b.close
+
+    }));
+
+  candleSeries.setData(candles);
+
+  const closes =
+    bars.map(b=>b.close);
+
+  const e9 =
+    ema(closes,9);
+
+  const e21 =
+    ema(closes,21);
+
+  ema9Series.setData(
+    bars.map((b,i)=>({
+      time:
+        Math.floor(
+          new Date(b.openTime).getTime()/1000
+        ),
+      value:e9[i]
+    })).filter(x=>x.value !== null)
+  );
+
+  ema21Series.setData(
+    bars.map((b,i)=>({
+      time:
+        Math.floor(
+          new Date(b.openTime).getTime()/1000
+        ),
+      value:e21[i]
+    })).filter(x=>x.value !== null)
+  );
+
+  chart.timeScale().fitContent();
+
+}
+
+
+/* =========================================================
+   UPDATE UI
+========================================================= */
+
+function updateAnalysisUI(analysis,finalData){
+
+  document.getElementById(
+    "chartTitle"
+  ).textContent =
+    `${selectedSymbol} · ${selectedTF.toUpperCase()}`;
+
+  document.getElementById(
+    "price"
+  ).textContent =
+    formatPrice(
+      analysis.price,
+      selectedSymbol
+    );
+
+  document.getElementById(
+    "trend"
+  ).textContent =
+    analysis.trend;
+
+  document.getElementById(
+    "rsi"
+  ).textContent =
+    analysis.rsi
+      ? analysis.rsi.toFixed(1)
+      : "—";
+
+  document.getElementById(
+    "macd"
+  ).textContent =
+    analysis.macd
+      ? analysis.macd.toFixed(6)
+      : "—";
+
+  document.getElementById(
+    "atr"
+  ).textContent =
+    analysis.atr
+      ? analysis.atr.toFixed(
+          MARKETS[selectedSymbol].digits
+        )
+      : "—";
+
+  document.getElementById(
+    "strength"
+  ).textContent =
+    Math.abs(analysis.score) >= 5
+      ? "STRONG"
+      : Math.abs(analysis.score) >= 3
+        ? "MODERATE"
+        : "WEAK";
+
+
+  const finalSignal =
+    finalData.final;
+
+  const signalElement =
+    document.getElementById(
+      "finalSignal"
+    );
+
+  const signalBox =
+    document.getElementById(
+      "signalBox"
+    );
+
+  signalElement.textContent =
+    finalSignal === "CALL"
+      ? "🟢 CALL (UP)"
+      : finalSignal === "PUT"
+        ? "🔴 PUT (DOWN)"
+        : "⚪ NO TRADE";
+
+  signalElement.className =
+    "signal " +
+    (
+      finalSignal === "CALL"
+        ? "call"
+        : finalSignal === "PUT"
+          ? "put"
+          : "no-trade"
+    );
+
+  signalBox.className =
+    "signal-box " +
+    (
+      finalSignal === "CALL"
+        ? "signal call"
+        : finalSignal === "PUT"
+          ? "signal put"
+          : "signal no-trade"
+    );
+
+  document.getElementById(
+    "confidence"
+  ).textContent =
+    `Multi-timeframe confidence: ${finalData.confidence}%`;
+
+
+  updateBar(
+    "trendBar",
+    "trendScore",
+    Math.min(
+      100,
+      Math.abs(analysis.score)*12
+    ),
+    Math.abs(analysis.score)
+  );
+
+  updateBar(
+    "momentumBar",
+    "momentumScore",
+    analysis.momentum === "NEUTRAL"
+      ? 30
+      : 75,
+    analysis.momentum
+  );
+
+  const liqStrength =
+    analysis.liquidity.buy &&
+    analysis.liquidity.sell
+      ? 70
+      : 30;
+
+  updateBar(
+    "liquidityBar",
+    "liquidityScore",
+    liqStrength,
+    liqStrength
+  );
+
+
+  const liq =
+    analysis.liquidity;
+
+  document.getElementById(
+    "buyLiquidity"
+  ).textContent =
+    liq.buy
+      ? formatPrice(
+          liq.buy,
+          selectedSymbol
+        )
+      : "—";
+
+  document.getElementById(
+    "sellLiquidity"
+  ).textContent =
+    liq.sell
+      ? formatPrice(
+          liq.sell,
+          selectedSymbol
+        )
+      : "—";
+
+  document.getElementById(
+    "buyStrength"
+  ).textContent =
+    "Recent swing-high liquidity";
+
+  document.getElementById(
+    "sellStrength"
+  ).textContent =
+    "Recent swing-low liquidity";
+
+  document.getElementById(
+    "sweep"
+  ).textContent =
+    liq.sweep;
+
+}
+
+
+function updateBar(
+  barId,
+  scoreId,
+  width,
+  score
+){
+
+  document.getElementById(
+    barId
+  ).style.width =
+    `${Math.max(0,Math.min(100,width))}%`;
+
+  document.getElementById(
+    scoreId
+  ).textContent =
+    typeof score === "number"
+      ? score
+      : score;
+
+}
+
+
+/* =========================================================
+   UPDATE MTF UI
+========================================================= */
+
+function updateMTFUI(mtf){
+
+  const mapping = {
+    "1m":"mtf1",
+    "5m":"mtf5",
+    "15m":"mtf15"
+  };
+
+  Object.entries(mapping)
+    .forEach(([tf,id])=>{
+
+      const el =
         document.getElementById(id);
 
-    if(!data){
+      const result =
+        mtf[tf];
 
-        element.textContent =
-            "--";
+      if(!result){
 
+        el.textContent="—";
         return;
 
-    }
+      }
 
-    if(data.signal==="CALL"){
+      el.textContent =
+        result.signal === "CALL"
+          ? "🟢 CALL"
+          : result.signal === "PUT"
+            ? "🔴 PUT"
+            : "⚪ WAIT";
 
-        element.textContent =
-            "CALL ↑";
+      el.style.color =
+        result.signal === "CALL"
+          ? "#15803d"
+          : result.signal === "PUT"
+            ? "#b91c1c"
+            : "#667085";
 
-        element.style.color =
-            "#16a34a";
-
-    }
-
-    else if(data.signal==="PUT"){
-
-        element.textContent =
-            "PUT ↓";
-
-        element.style.color =
-            "#dc2626";
-
-    }
-
-    else{
-
-        element.textContent =
-            data.signal;
-
-        element.style.color =
-            "#6b7280";
-
-    }
+    });
 
 }
 
 
 /* =========================================================
-   LOAD CHART
+   LOAD MAIN CHART
 ========================================================= */
 
 async function loadChart(){
 
-    const candles =
-        await getCandles(
-            selectedMarket,
-            selectedTimeframe,
-            200
-        );
+  try{
 
-    latestCandles =
-        candles;
+    document.getElementById(
+      "connectionStatus"
+    ).textContent =
+      "Loading market data...";
 
-    candleSeries.setData(candles);
+    const bars =
+      await fetchBars(
+        selectedSymbol,
+        selectedTF
+      );
 
-    chart.timeScale().fitContent();
+    currentBars =
+      bars;
 
-    document.getElementById("chartTitle")
-        .textContent =
-        selectedMarket +
-        " · " +
-        selectedTimeframe.replace("min","m");
-
-
-    document.getElementById("lastUpdated")
-        .textContent =
-        "Updated " +
-        new Date().toLocaleTimeString();
-
+    drawChart(bars);
 
     const analysis =
-        calculateSignal(candles);
-
-
-    document.getElementById("currentPrice")
-        .textContent =
-        formatPrice(
-            candles[candles.length-1].close
-        );
-
-
-    document.getElementById("emaValue")
-        .textContent =
-        formatPrice(analysis.ema9) +
-        " / " +
-        formatPrice(analysis.ema21);
-
-
-    document.getElementById("rsiValue")
-        .textContent =
-        analysis.rsi ?
-        analysis.rsi.toFixed(1)
-        : "--";
-
-
-    document.getElementById("macdValue")
-        .textContent =
-        analysis.macd.macd >
-        analysis.macd.signal
-        ? "UP"
-        : "DOWN";
-
-
-    const recentATR =
-        atr(candles);
-
-
-    document.getElementById("supertrendValue")
-        .textContent =
-        analysis.ema9 >
-        analysis.ema21
-        ? "UP"
-        : "DOWN";
-
-
-    const sr =
-        supportResistance(candles);
-
-
-    document.getElementById("supportValue")
-        .textContent =
-        formatPrice(sr.support);
-
-
-    document.getElementById("resistanceValue")
-        .textContent =
-        formatPrice(sr.resistance);
-
-}
-
-
-/* =========================================================
-   LOAD EVERYTHING
-========================================================= */
-
-async function loadEverything(){
-
-    selectedMarket =
-        document.getElementById("marketSelect").value;
-
-
-    if(!apiKey){
-
-        document.getElementById("apiStatus")
-            .textContent =
-            "Enter your Twelve Data API key.";
-
-        return;
-
-    }
-
-
-    try{
-
-        document.getElementById("apiStatus")
-            .textContent =
-            "Loading market data...";
-
-
-        await loadChart();
-
-
-        const mtf =
-            await getMTF(
-                selectedMarket
-            );
-
-
-        displayMTF(mtf);
-
-
-        const final =
-            finalMTFSignal(mtf);
-
-
-        displayFinalSignal(final);
-
-
-        /*
-          Suggested analysis window.
-
-          This is NOT a guaranteed expiry.
-        */
-
-        document.getElementById("windowValue")
-            .textContent =
-            selectedTimeframe==="1min"
-            ? "1–3 min"
-            : selectedTimeframe==="5min"
-            ? "5–15 min"
-            : "15–30 min";
-
-
-        document.getElementById("apiStatus")
-            .textContent =
-            "Market data loaded.";
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        document.getElementById("apiStatus")
-            .textContent =
-            error.message;
-
-    }
-
-}
-
-
-/* =========================================================
-   MARKET QUOTES
-========================================================= */
-
-async function loadMarketQuotes(){
-
-    if(!apiKey)
-        return;
-
-    for(const symbol of MARKETS){
-
-        try{
-
-            const quote =
-                await getQuote(symbol);
-
-            if(!quote)
-                continue;
-
-            const id =
-                symbol.replace("/","");
-
-            const price =
-                document.getElementById(
-                    "price-"+id
-                );
-
-            const change =
-                document.getElementById(
-                    "change-"+id
-                );
-
-
-            if(price){
-
-                price.textContent =
-                    formatPrice(
-                        Number(quote.close)
-                    );
-
-            }
-
-
-            if(change){
-
-                const pct =
-                    Number(
-                        quote.percent_change
-                    );
-
-
-                change.textContent =
-                    (pct>=0 ? "+" : "") +
-                    pct.toFixed(2) +
-                    "%";
-
-
-                change.className =
-                    "market-change " +
-                    (
-                        pct>=0
-                        ? "up"
-                        : "down"
-                    );
-
-            }
-
-        }
-        catch(error){
-
-            console.log(
-                "Quote error:",
-                symbol,
-                error
-            );
-
-        }
-
-    }
-
-}
-
-
-function formatPrice(value){
-
-    if(value===undefined ||
-       value===null ||
-       Number.isNaN(value))
-        return "--";
-
-    if(value > 1000)
-        return value.toLocaleString(
-            undefined,
-            {
-                maximumFractionDigits:2
-            }
-        );
-
-    return value.toLocaleString(
-        undefined,
-        {
-            maximumFractionDigits:5
-        }
+      analyzeBars(bars);
+
+    latestAnalysis =
+      analysis;
+
+    const mtf =
+      await getMTF();
+
+    const finalData =
+      calculateFinalSignal(
+        mtf,
+        analysis
+      );
+
+    updateAnalysisUI(
+      analysis,
+      finalData
     );
 
+    updateMTFUI(mtf);
+
+    document.getElementById(
+      "connectionStatus"
+    ).textContent =
+      "Live market data connected";
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById(
+      "connectionStatus"
+    ).textContent =
+      "Unable to load this market";
+
+  }
+
 }
 
 
 /* =========================================================
-   TENSORFLOW
+   TIMEFRAME BUTTONS
+========================================================= */
+
+document
+  .querySelectorAll(
+    ".tf-buttons button"
+  )
+  .forEach(button=>{
+
+    button.onclick=()=>{
+
+      selectedTF =
+        button.dataset.tf;
+
+      document
+        .querySelectorAll(
+          ".tf-buttons button"
+        )
+        .forEach(x=>
+          x.classList.remove("active")
+        );
+
+      button.classList.add("active");
+
+      loadChart();
+
+    };
+
+  });
+
+
+/* =========================================================
+   SYMBOL SELECT
+========================================================= */
+
+symbolSelect.onchange=()=>{
+
+  selectedSymbol =
+    symbolSelect.value;
+
+  document
+    .querySelectorAll(".market-card")
+    .forEach(x=>
+      x.classList.remove("active")
+    );
+
+  document
+    .getElementById(
+      "card-"+selectedSymbol
+    )
+    ?.classList.add("active");
+
+  loadChart();
+
+};
+
+
+/* =========================================================
+   SCREENSHOT ANALYZER
+========================================================= */
+
+const uploadBox =
+  document.getElementById(
+    "uploadBox"
+  );
+
+const imageInput =
+  document.getElementById(
+    "imageInput"
+  );
+
+const preview =
+  document.getElementById(
+    "preview"
+  );
+
+const previewImage =
+  document.getElementById(
+    "previewImage"
+  );
+
+const aiResult =
+  document.getElementById(
+    "aiResult"
+  );
+
+
+uploadBox.onclick=()=>{
+  imageInput.click();
+};
+
+
+uploadBox.addEventListener(
+  "dragover",
+  event=>{
+    event.preventDefault();
+    uploadBox.style.borderColor =
+      "#2563eb";
+  }
+);
+
+
+uploadBox.addEventListener(
+  "dragleave",
+  ()=>{
+    uploadBox.style.borderColor =
+      "#cbd5e1";
+  }
+);
+
+
+uploadBox.addEventListener(
+  "drop",
+  event=>{
+
+    event.preventDefault();
+
+    uploadBox.style.borderColor =
+      "#cbd5e1";
+
+    const file =
+      event.dataTransfer.files[0];
+
+    if(file)
+      analyzeScreenshot(file);
+
+  }
+);
+
+
+imageInput.onchange=event=>{
+
+  const file =
+    event.target.files[0];
+
+  if(file)
+    analyzeScreenshot(file);
+
+};
+
+
+/* =========================================================
+   TENSORFLOW INITIALIZATION
 ========================================================= */
 
 async function initializeTensorFlow(){
 
-    try{
+  try{
 
-        await tf.ready();
+    await tf.ready();
 
-        document.getElementById("tfStatus")
-            .textContent =
-            "TensorFlow.js READY";
+    document.getElementById(
+      "tensorStatus"
+    ).textContent =
+      `TensorFlow.js ready — backend: ${tf.getBackend()}`;
 
-    }
-    catch(error){
+  }catch(error){
 
-        document.getElementById("tfStatus")
-            .textContent =
-            "TensorFlow ERROR";
+    document.getElementById(
+      "tensorStatus"
+    ).textContent =
+      "TensorFlow.js failed to initialize.";
 
-    }
+    console.error(error);
+
+  }
 
 }
-
 
 initializeTensorFlow();
 
 
 /* =========================================================
-   IMAGE UPLOAD
+   SCREENSHOT ANALYSIS
 ========================================================= */
 
-const imageInput =
-    document.getElementById("imageInput");
+async function analyzeScreenshot(file){
 
-const uploadArea =
-    document.getElementById("uploadArea");
+  if(!file.type.startsWith("image/"))
+    return;
 
+  const url =
+    URL.createObjectURL(file);
 
-imageInput.addEventListener(
-    "change",
-    function(event){
+  previewImage.src =
+    url;
 
-        const file =
-            event.target.files[0];
+  preview.style.display =
+    "block";
 
-        if(file)
-            loadScannerImage(file);
+  aiResult.style.display =
+    "block";
 
-    }
-);
-
-
-/* Drag and drop */
-
-uploadArea.addEventListener(
-    "dragover",
-    event=>{
-
-        event.preventDefault();
-
-        uploadArea.style.borderColor =
-            "#16a34a";
-
-    }
-);
+  document.getElementById(
+    "imageSignal"
+  ).textContent =
+    "ANALYZING...";
 
 
-uploadArea.addEventListener(
-    "dragleave",
-    ()=>{
+  const image =
+    new Image();
 
-        uploadArea.style.borderColor =
-            "#cbd5e1";
+  image.onload =
+    async ()=>{
 
-    }
-);
-
-
-uploadArea.addEventListener(
-    "drop",
-    event=>{
-
-        event.preventDefault();
-
-        uploadArea.style.borderColor =
-            "#cbd5e1";
-
-        const file =
-            event.dataTransfer.files[0];
-
-        if(file && file.type.startsWith("image/")){
-
-            loadScannerImage(file);
-
-        }
-
-    }
-);
-
-
-function loadScannerImage(file){
-
-    scannerImage =
-        file;
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload =
-        function(event){
-
-            const preview =
-                document.getElementById("preview");
-
-            preview.src =
-                event.target.result;
-
-            preview.style.display =
-                "block";
-
-            document.getElementById("uploadContent")
-                .style.display =
-                "none";
-
-            document.getElementById("aiSignal")
-                .textContent =
-                "READY";
-
-            document.getElementById("aiConfidence")
-                .textContent =
-                "Screenshot loaded. Click Analyze.";
-
-        };
-
-
-    reader.readAsDataURL(file);
-
-}
-
-
-/* =========================================================
-   TENSORFLOW SCREENSHOT ANALYZER
-========================================================= */
-
-async function scanScreenshot(){
-
-    if(!scannerImage){
-
-        alert(
-            "Please upload a trading chart screenshot first."
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        document.getElementById("scanButton");
-
-    button.disabled = true;
-
-    button.textContent =
-        "🧠 TensorFlow analyzing...";
-
-
-    try{
-
-        const image =
-            document.getElementById("preview");
-
+      try{
 
         /*
-          TensorFlow.js reads the screenshot
-          into a tensor.
+         TensorFlow tensor.
 
-          This is genuine TensorFlow processing,
-          not a fake API call.
+         Resize screenshot to a standardized
+         224x224 RGB tensor.
         */
 
         const tensor =
-            tf.browser.fromPixels(image);
+          tf.tidy(()=>{
 
-
-        /*
-          Resize for consistent processing.
-        */
-
-        const resized =
-            tf.image.resizeBilinear(
-                tensor,
+            return tf.browser
+              .fromPixels(image)
+              .resizeBilinear(
                 [224,224]
-            );
+              )
+              .toFloat();
 
+          });
 
-        /*
-          Normalize pixels.
-        */
 
         const normalized =
-            resized.toFloat().div(255);
+          tf.tidy(()=>
+            tensor.div(255)
+          );
+
+
+        const shape =
+          normalized.shape;
+
+        document.getElementById(
+          "tensorShape"
+        ).textContent =
+          shape.join(" × ");
 
 
         /*
-          Calculate average RGB.
+         Tensor statistics.
         */
 
-        const mean =
-            normalized.mean(
-                [0,1]
-            );
+        const stats =
+          await normalized.mean([
+            0,1
+          ]).data();
+
+        const brightness =
+          (
+            (stats[0]+
+             stats[1]+
+             stats[2])
+            /3
+          ) * 100;
 
 
-        const meanRGB =
-            await mean.data();
+        document.getElementById(
+          "brightness"
+        ).textContent =
+          `${brightness.toFixed(1)}%`;
 
 
         /*
-          Convert image into a grayscale
-          luminance tensor.
+         Visual edge/activity approximation
+         using TensorFlow operations.
         */
 
         const gray =
-            normalized.mean(2);
+          tf.tidy(()=>
+            normalized.mean(2)
+          );
 
-
-        /*
-          Compare upper and lower image
-          luminance.
-
-          This helps detect broad visual
-          chart structure.
-        */
-
-        const upper =
-            gray
-            .slice([0,0],[112,224])
-            .mean();
-
-        const lower =
-            gray
-            .slice([112,0],[112,224])
-            .mean();
-
-
-        const upperValue =
-            (await upper.data())[0];
-
-        const lowerValue =
-            (await lower.data())[0];
-
-
-        /*
-          Edge-like differences.
-        */
-
-        const horizontal =
-            gray.slice(
-                [0,1],
-                [224,223]
+        const shiftedX =
+          gray
+            .slice(
+              [0,1],
+              [224,223]
             );
 
-        const horizontal2 =
-            gray.slice(
-                [0,0],
-                [224,223]
+        const originalX =
+          gray
+            .slice(
+              [0,0],
+              [224,223]
             );
 
-        const diff =
-            horizontal
-            .sub(horizontal2)
-            .abs()
-            .mean();
+        const difference =
+          tf.tidy(()=>
+            shiftedX
+              .sub(originalX)
+              .abs()
+              .mean()
+          );
 
+        const activity =
+          (await difference.data())[0];
 
-        const edgeValue =
-            (await diff.data())[0];
+        document.getElementById(
+          "visualActivity"
+        ).textContent =
+          activity > .06
+            ? "HIGH"
+            : activity > .025
+              ? "MEDIUM"
+              : "LOW";
 
 
         /*
-          Green / red pixel estimation.
-
-          Trading screenshots often contain
-          green and red candles.
+         Analyze approximate green/red
+         regions from image pixels.
         */
 
         const pixels =
-            await normalized.data();
+          await tf.tidy(()=>
+            normalized
+              .mul(255)
+              .cast("int32")
+          ).data();
 
 
-        let greenPixels = 0;
-        let redPixels = 0;
-
-        let totalPixels = 224*224;
-
+        let green=0;
+        let red=0;
 
         for(
-            let i=0;
-            i<pixels.length;
-            i+=3
+          let i=0;
+          i<pixels.length;
+          i+=3
         ){
 
-            const r =
-                pixels[i];
+          const r =
+            pixels[i];
 
-            const g =
-                pixels[i+1];
+          const g =
+            pixels[i+1];
 
-            const b =
-                pixels[i+2];
+          const b =
+            pixels[i+2];
 
+          if(
+            g > r*1.25 &&
+            g > b*1.15 &&
+            g > 90
+          )
+            green++;
 
-            if(
-                g > r*1.15 &&
-                g > b*1.15 &&
-                g > 0.35
-            ){
-
-                greenPixels++;
-
-            }
-
-
-            if(
-                r > g*1.15 &&
-                r > b*1.15 &&
-                r > 0.35
-            ){
-
-                redPixels++;
-
-            }
+          if(
+            r > g*1.25 &&
+            r > b*1.15 &&
+            r > 90
+          )
+            red++;
 
         }
 
+
+        const total =
+          pixels.length/3;
 
         const greenRatio =
-            greenPixels/totalPixels;
+          green/total;
 
         const redRatio =
-            redPixels/totalPixels;
+          red/total;
 
 
-        /*
-          Determine visual direction.
+        let visualDirection =
+          "NEUTRAL";
 
-          This is a visual heuristic, not
-          a trained market prediction model.
-        */
+        if(
+          greenRatio >
+          redRatio*1.25
+        )
+          visualDirection =
+            "UP";
 
-        let score = 0;
-
-
-        if(greenRatio > redRatio*1.15)
-            score += 2;
-
-        if(redRatio > greenRatio*1.15)
-            score -= 2;
-
-
-        if(upperValue < lowerValue)
-            score += 1;
-
-        if(upperValue > lowerValue)
-            score -= 1;
+        if(
+          redRatio >
+          greenRatio*1.25
+        )
+          visualDirection =
+            "DOWN";
 
 
-        let aiSignal;
-
-        if(score >= 2)
-            aiSignal = "CALL";
-
-        else if(score <= -2)
-            aiSignal = "PUT";
-
-        else
-            aiSignal = "NO TRADE";
+        document.getElementById(
+          "visualDirection"
+        ).textContent =
+          visualDirection;
 
 
-        let confidence =
-            50 +
-            Math.min(
-                42,
-                Math.abs(score)*10 +
-                Math.abs(
-                    greenRatio-redRatio
-                )*100
-            );
-
-
-        confidence =
-            Math.round(
-                Math.min(92,confidence)
-            );
-
-
-        /*
-          Structure
-        */
-
-        let structure;
-
-        if(edgeValue > 0.13)
-            structure = "HIGH ACTIVITY";
-
-        else if(edgeValue > 0.07)
-            structure = "NORMAL";
-
-        else
-            structure = "LOW ACTIVITY";
-
-
-        let momentum;
-
-        if(greenRatio > redRatio)
-            momentum = "UPWARD";
-
-        else if(redRatio > greenRatio)
-            momentum = "DOWNWARD";
-
-        else
-            momentum = "MIXED";
-
-
-        /*
-          Display
-        */
-
-        const aiSignalElement =
-            document.getElementById("aiSignal");
-
-
-        aiSignalElement.textContent =
-            aiSignal==="CALL"
-            ? "CALL ↑"
-            : aiSignal==="PUT"
-            ? "PUT ↓"
-            : "NO TRADE";
-
-
-        aiSignalElement.style.color =
-            aiSignal==="CALL"
-            ? "#16a34a"
-            : aiSignal==="PUT"
-            ? "#dc2626"
-            : "#374151";
-
-
-        document.getElementById("aiConfidence")
-            .textContent =
-            "Visual confidence: " +
-            confidence +
-            "%";
-
-
-        document.getElementById("aiConfidenceFill")
-            .style.width =
-            confidence + "%";
-
-
-        document.getElementById("visualDirection")
-            .textContent =
-            aiSignal==="CALL"
-            ? "UP ↑"
-            : aiSignal==="PUT"
-            ? "DOWN ↓"
-            : "MIXED";
-
-
-        document.getElementById("candleBalance")
-            .textContent =
-            greenRatio > redRatio
-            ? "GREEN > RED"
+        document.getElementById(
+          "candleMomentum"
+        ).textContent =
+          greenRatio > redRatio
+            ? "BUY PRESSURE"
             : redRatio > greenRatio
-            ? "RED > GREEN"
-            : "BALANCED";
+              ? "SELL PRESSURE"
+              : "BALANCED";
 
 
-        document.getElementById("imageMomentum")
-            .textContent =
-            momentum;
-
-
-        document.getElementById("chartStructure")
-            .textContent =
-            structure;
-
-
-        let reason =
-            "TensorFlow.js processed the screenshot. ";
-
-
-        if(aiSignal==="CALL"){
-
-            reason +=
-                "The image contains a stronger green/UP visual component. " +
-                "This produces a CALL (UP) visual result.";
-
-        }
-
-        else if(aiSignal==="PUT"){
-
-            reason +=
-                "The image contains a stronger red/DOWN visual component. " +
-                "This produces a PUT (DOWN) visual result.";
-
-        }
-
-        else{
-
-            reason +=
-                "The visual evidence is mixed, so the scanner returns NO TRADE.";
-
-        }
-
-
-        reason +=
-            " Combine this with the live MTF signal before making any trading decision.";
-
-
-        document.getElementById("aiReason")
-            .textContent =
-            reason;
+        document.getElementById(
+          "visualLiquidity"
+        ).textContent =
+          activity > .06
+            ? "Possible active zone"
+            : "No clear zone";
 
 
         /*
-          Clean TensorFlow tensors.
+         IMPORTANT:
+         This is not pretending to be a trained
+         neural-network trading model.
+
+         The TensorFlow tensor processing is real,
+         but no trained weights are supplied here.
+        */
+
+        let signal =
+          "NO TRADE";
+
+        let confidence=50;
+
+        if(
+          visualDirection === "UP" &&
+          activity > .025
+        ){
+
+          signal =
+            "CALL";
+
+          confidence =
+            Math.min(
+              75,
+              52+
+              Math.round(
+                greenRatio*500
+              )
+            );
+
+        }
+
+        else if(
+          visualDirection === "DOWN" &&
+          activity > .025
+        ){
+
+          signal =
+            "PUT";
+
+          confidence =
+            Math.min(
+              75,
+              52+
+              Math.round(
+                redRatio*500
+              )
+            );
+
+        }
+
+
+        const signalEl =
+          document.getElementById(
+            "imageSignal"
+          );
+
+        signalEl.textContent =
+          signal === "CALL"
+            ? "🟢 CALL (UP)"
+            : signal === "PUT"
+              ? "🔴 PUT (DOWN)"
+              : "⚪ NO TRADE";
+
+        signalEl.className =
+          "signal " +
+          (
+            signal === "CALL"
+              ? "call"
+              : signal === "PUT"
+                ? "put"
+                : "no-trade"
+          );
+
+
+        document.getElementById(
+          "imageConfidence"
+        ).textContent =
+          `Experimental visual confidence: ${confidence}%`;
+
+
+        /*
+         Dispose tensors.
         */
 
         tensor.dispose();
-        resized.dispose();
         normalized.dispose();
-        mean.dispose();
         gray.dispose();
-        upper.dispose();
-        lower.dispose();
-        horizontal.dispose();
-        horizontal2.dispose();
-        diff.dispose();
+        shiftedX.dispose();
+        originalX.dispose();
+        difference.dispose();
 
+      }catch(error){
 
-    }
-    catch(error){
+        console.error(
+          "Screenshot analysis error:",
+          error
+        );
 
-        console.error(error);
+        document.getElementById(
+          "imageSignal"
+        ).textContent =
+          "ANALYSIS ERROR";
 
-        document.getElementById("aiSignal")
-            .textContent =
-            "ERROR";
+      }
 
-        document.getElementById("aiConfidence")
-            .textContent =
-            error.message;
+    };
 
-    }
-
-
-    button.disabled = false;
-
-    button.textContent =
-        "🧠 Analyze Screenshot";
+  image.src =
+    url;
 
 }
 
 
 /* =========================================================
-   INITIALIZATION
+   AUTO REFRESH
 ========================================================= */
 
+/*
+   Market cards refresh every 10 seconds.
+   Main chart refreshes every 30 seconds.
+*/
+
+updateMarketCards();
+loadChart();
+
 setInterval(
-    ()=>{
-        if(apiKey)
-            loadMarketQuotes();
-    },
-    15*60*1000
+  updateMarketCards,
+  10000
+);
+
+setInterval(
+  loadChart,
+  30000
 );
 
 
-/*
-   Don't automatically hammer the API.
+/* =========================================================
+   RESIZE
+========================================================= */
 
-   Initial market quotes + selected chart
-   are loaded when the user presses refresh
-   or selects a market.
-*/
+window.addEventListener(
+  "resize",
+  ()=>{
+    if(chart){
 
-if(apiKey){
+      chart.applyOptions({
+        width:
+          document
+            .getElementById("chart")
+            .clientWidth
+      });
 
-    loadEverything();
-
-    loadMarketQuotes();
-
-}
+    }
+  }
+);
 
 </script>
 
